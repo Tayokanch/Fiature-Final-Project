@@ -1,6 +1,6 @@
 import api from '../../services/api';
 
-export const fetchWebhooks = async (authToken) => {
+export const getWebhooks = async (authToken) => {
   try {
     const response = await api.get('/webhooks', {
       headers: { Authorization: `Bearer ${authToken}` },
@@ -11,7 +11,7 @@ export const fetchWebhooks = async (authToken) => {
   }
 };
 
-export const addWebhook = async (authToken, webhookUrl) => {
+export const createWebhook = async (authToken, webhookUrl) => {
   try {
     await api.post('/add_webhook', { webhook_url: webhookUrl }, {
       headers: { Authorization: `Bearer ${authToken}` },

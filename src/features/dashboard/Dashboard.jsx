@@ -1,15 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import Card from '../../components/Card';
-import TransactionList from '../../components/TransactionList';
-import JWTDisplay from './JWTDisplay';
-import { fetchBalance, fetchTransactions } from './dashboardService';
-import { useAuthStore } from '../../store/authStore';
-import { FiDollarSign, FiBarChart3, FiDatabase, FiTrendingUp } from 'react-icons/fi';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../store/authStore';
+import { fetchDashboardData } from './dashboardService';
+import BalanceCard from './BalanceCard';
+import TransactionList from './TransactionList';
+import StatsChart from '../../components/StatsChart';
 import { useTheme } from '../../store/themeStore';
 import { getThemeColors } from '../../utils/themeUtils';
 
 const Dashboard = () => {
-  const { token: authToken } = useAuthStore();
+  const { token: authToken } = useAuth();
   const { isDarkMode } = useTheme();
   const colors = getThemeColors(isDarkMode);
   const [balance, setBalance] = useState(null);
@@ -22,9 +21,9 @@ const Dashboard = () => {
       setIsLoading(true);
       setDashboardError('');
       try {
-        const balanceResponse = await fetchBalance(authToken);
+        const balanceResponse = await fetchDashboardData(authToken);
         setBalance(balanceResponse?.balance || 0);
-        const transactionsResponse = await fetchTransactions(authToken);
+        const transactionsResponse = await fetchDashboardData(authToken);
         setTransactions(transactionsResponse?.transactions || []);
       } catch (error) {
         setDashboardError('Failed to load dashboard data');

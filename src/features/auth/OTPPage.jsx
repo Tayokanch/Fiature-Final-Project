@@ -10,7 +10,7 @@ const OTPPage = () => {
   const navigate = useNavigate();
   const { verifyOtp, loading: authLoading, error: authError } = useAuth();
 
-  const { verification_uuid: verificationUuid, action, email } = location.state || {};
+  const { verification_uuid: verificationUuid, action } = location.state || {};
 
   const handleSubmit = async (event) => {
     event.preventDefault();

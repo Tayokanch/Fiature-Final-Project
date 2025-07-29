@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { useAuthStore } from '../store/authStore';
+import { useAuth as useAuthContext } from '../store/authStore';
 import {
   login as loginApi,
   signup as signupApi,
   verifyOtp as verifyOtpApi,
   refreshToken as refreshTokenApi,
 } from '../features/auth/authService';
-import { saveToken, encryptRecaptchaToken } from '../features/auth/authUtils';
+import { saveToken } from '../utils/authUtils';
+import { encryptRecaptchaToken } from '../features/auth/authUtils';
 
 export const useAuth = () => {
-  const authContext = useAuthStore();
+  const authContext = useAuthContext();
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
 
@@ -18,17 +19,27 @@ export const useAuth = () => {
     setAuthLoading(true);
     try {
       const recaptchaToken = encryptRecaptchaToken(email);
+      console.log('useAuth login called with:', { email, recaptchaToken });
       const response = await loginApi({ email, password, recaptchaToken });
+      console.log('useAuth login response:', response);
+      
       if (response && response.token) {
         saveToken(response.token);
         authContext.setToken(response.token);
         if (response.refreshToken) authContext.setRefreshToken(response.refreshToken);
         return response;
+      } else if (response && response.verification_uuid) {
+        // OTP verification required
+        console.log('OTP verification required, returning response:', response);
+        return response;
       } else {
         setAuthError(response?.message || 'Login failed');
+        return response;
       }
     } catch (error) {
+      console.error('useAuth login error:', error);
       setAuthError('Login failed');
+      return { message: 'Login failed' };
     } finally {
       setAuthLoading(false);
     }

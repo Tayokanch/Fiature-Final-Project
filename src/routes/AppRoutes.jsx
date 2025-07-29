@@ -36,7 +36,7 @@ const AppRoutes = () => {
 
         <Route
           path="/otp"
-          element={token ? <Navigate to="/dashboard" /> : <OTPPage />}
+          element={<OTPPage />}
         />
       </Route>
 

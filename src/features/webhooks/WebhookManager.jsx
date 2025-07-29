@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../store/authStore';
+import { getWebhooks, createWebhook, deleteWebhook } from './webhookService';
+import { Button } from '../../components/Button';
+import { Input } from '../../components/Input';
 import Card from '../../components/Card';
-import Input from '../../components/Input';
-import Button from '../../components/Button';
-import { addWebhook, deleteWebhook, fetchWebhooks } from './webhookService';
-import { useAuthStore } from '../../store/authStore';
 
 const WebhookManager = () => {
-  const { token: authToken } = useAuthStore();
+  const { token: authToken } = useAuth();
   const [webhookUrls, setWebhookUrls] = useState([]);
   const [newWebhookUrl, setNewWebhookUrl] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +18,7 @@ const WebhookManager = () => {
       setIsLoading(true);
       setWebhookError('');
       try {
-        const response = await fetchWebhooks(authToken);
+        const response = await getWebhooks(authToken);
         setWebhookUrls(response?.webhooks || []);
       } catch {
         setWebhookError('Failed to load webhooks');
@@ -35,7 +35,7 @@ const WebhookManager = () => {
     if (!newWebhookUrl) return setWebhookError('Webhook URL required');
     if (webhookUrls.length >= 3) return setWebhookError('Max 3 webhooks allowed');
     try {
-      await addWebhook(authToken, newWebhookUrl);
+      await createWebhook(authToken, newWebhookUrl);
       setWebhookUrls([...webhookUrls, newWebhookUrl]);
       setNewWebhookUrl('');
       setWebhookSuccess('Webhook added');

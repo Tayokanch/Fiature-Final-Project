@@ -20,4 +20,19 @@ export const fetchTransactions = async (authToken) => {
   } catch (error) {
     return { transactions: [] };
   }
+};
+
+export const fetchDashboardData = async (authToken) => {
+  try {
+    const [balanceResponse, transactionsResponse] = await Promise.all([
+      fetchBalance(authToken),
+      fetchTransactions(authToken)
+    ]);
+    return {
+      balance: balanceResponse.balance,
+      transactions: transactionsResponse.transactions
+    };
+  } catch (error) {
+    return { balance: 0, transactions: [] };
+  }
 }; 

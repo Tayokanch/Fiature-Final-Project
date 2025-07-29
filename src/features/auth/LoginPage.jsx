@@ -14,7 +14,18 @@ const LoginPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const response = await login({ email, password, name });
-    if (response && response.token) {
+    
+    if (response && response.verification_uuid) {
+      // Navigate to OTP page for verification
+      navigate('/otp', { 
+        state: { 
+          verification_uuid: response.verification_uuid, 
+          action: 'login', 
+          email: email
+        } 
+      });
+    } else if (response && response.token) {
+      // Direct login success (no OTP required)
       navigate('/dashboard');
     }
   };

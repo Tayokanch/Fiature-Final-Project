@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../store/authStore';
+import { changePassword } from '../../services/authService';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import { useAuthStore } from '../../store/authStore';
-import api from '../../services/api';
 
 const ChangePasswordForm = () => {
-  const { token } = useAuthStore();
+  const { token } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -23,13 +23,11 @@ const ChangePasswordForm = () => {
     }
     setLoading(true);
     try {
-      await api.post('/reset-password', {
+      await changePassword({
         email: '', // Optionally fetch from user context
         newPassword,
         recaptchaToken: 'forgot_password',
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      }, token);
       setSuccess('Password changed successfully');
       setCurrentPassword('');
       setNewPassword('');

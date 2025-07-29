@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../store/authStore';
-import { login } from '../../services/authService';
-import { encryptRecaptchaToken } from '../../features/auth/authUtils';
+import { useAuth } from '../../hooks/useAuth';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { useTheme } from '../../store/themeStore';
@@ -14,11 +12,9 @@ const LoginPage = () => {
     email: '',
     password: '',
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   
-  const { login: authLogin } = useAuth();
   const navigate = useNavigate();
+  const { login, loading, error } = useAuth();
   const { isDarkMode } = useTheme();
   const colors = getThemeColors(isDarkMode);
 
@@ -31,26 +27,32 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
 
     try {
-      const loginData = {
-        ...formData,
-        recaptchaToken: encryptRecaptchaToken(formData.email)
-      };
-      console.log('Login attempt with:', { email: formData.email, recaptchaToken: loginData.recaptchaToken });
-      const response = await login(loginData);
-      if (response.token) {
-        authLogin(response.user, response.token, response.refreshToken);
+      console.log('LoginPage: Calling login with:', { email: formData.email, password: formData.password });
+      const response = await login({ email: formData.email, password: formData.password });
+      console.log('LoginPage: Received response:', response);
+      
+      if (response && response.verification_uuid) {
+        console.log('LoginPage: Navigating to OTP page with verification_uuid:', response.verification_uuid);
+        // Navigate to OTP page for verification
+        navigate('/otp', { 
+          state: { 
+            verification_uuid: response.verification_uuid, 
+            action: 'login', 
+            email: formData.email 
+          } 
+        });
+      } else if (response && response.token) {
+        console.log('LoginPage: Direct login success, navigating to dashboard');
+        // Direct login success (no OTP required)
         navigate('/dashboard');
       } else {
-        setError(response.message || 'Login failed');
+        console.log('LoginPage: No verification_uuid or token in response');
       }
     } catch (err) {
-      setError(err.message || 'Login failed');
-    } finally {
-      setLoading(false);
+      // Error is handled by the useAuth hook
+      console.error('LoginPage: Login error:', err);
     }
   };
 
@@ -132,6 +134,23 @@ const LoginPage = () => {
             Sign up
           </Link>
         </p>
+        
+        {/* Test button for debugging */}
+        <button 
+          onClick={() => {
+            console.log('Test navigation to OTP');
+            navigate('/otp', { 
+              state: { 
+                verification_uuid: 'test-uuid', 
+                action: 'login', 
+                email: 'test@example.com' 
+              } 
+            });
+          }}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          Test OTP Navigation
+        </button>
       </div>
     </div>
   );

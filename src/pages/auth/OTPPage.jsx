@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../store/authStore';
-import { verifyOtp } from '../../services/authService';
+import { useAuth } from '../../hooks/useAuth';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { useTheme } from '../../store/themeStore';
@@ -10,20 +9,21 @@ import { getThemeColors } from '../../utils/themeUtils';
 const OTPPage = () => {
   const [otpCode, setOtpCode] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   
   const location = useLocation();
   const navigate = useNavigate();
-  const { login: authLogin } = useAuth();
+  const { verifyOtp, loading: authLoading, error: authError } = useAuth();
   const { isDarkMode } = useTheme();
   const colors = getThemeColors(isDarkMode);
 
   const { verification_uuid, action, email } = location.state || {};
+  
+  console.log('OTPPage: Received location state:', location.state);
+  console.log('OTPPage: Extracted values:', { verification_uuid, action, email });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
     try {
       const otpData = {
@@ -37,18 +37,20 @@ const OTPPage = () => {
       };
 
       const response = await verifyOtp(otpData);
-      if (response.token) {
-        authLogin(response.user, response.token, response.refreshToken);
+      if (response && response.token) {
         navigate('/dashboard');
-      } else {
-        setError(response.message || 'OTP verification failed');
       }
     } catch (err) {
       setError(err.message || 'OTP verification failed');
-    } finally {
-      setLoading(false);
     }
   };
+
+  // Show auth error if any
+  React.useEffect(() => {
+    if (authError) {
+      setError(authError);
+    }
+  }, [authError]);
 
   if (!verification_uuid) {
     return (
@@ -81,6 +83,12 @@ const OTPPage = () => {
         >
           Enter the 6-digit code sent to {email}
         </p>
+        <p 
+          className="text-xs mt-1"
+          style={{ color: colors.secondaryTextColor }}
+        >
+          Action: {action === 'login' ? 'Login' : 'Signup'}
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -105,10 +113,10 @@ const OTPPage = () => {
         <Button
           type="submit"
           variant="primary"
-          disabled={loading}
+          disabled={authLoading}
           className="w-full"
         >
-          {loading ? 'Verifying...' : 'Verify OTP'}
+          {authLoading ? 'Verifying...' : 'Verify OTP'}
         </Button>
       </form>
 
@@ -121,7 +129,7 @@ const OTPPage = () => {
           <button 
             className="font-medium hover:underline"
             style={{ color: colors.iconColor }}
-            onClick={() => navigate('/login')}
+            onClick={() => navigate(action === 'login' ? '/login' : '/signup')}
           >
             Try again
           </button>
