@@ -1,13 +1,5 @@
 // Utility functions for authentication
 
-export const saveToken = (token) => {
-  localStorage.setItem('jwt', token);
-};
-
-export const getToken = () => {
-  return localStorage.getItem('jwt');
-};
-
 export const encryptRecaptchaToken = (email) => {
   if (!email) {
     console.warn('Email is required for recaptcha token generation');

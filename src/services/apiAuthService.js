@@ -2,13 +2,10 @@ import api from './api';
 
 export const login = async (credentials) => {
   try {
-    console.log('authService: Making login request with:', credentials);
     const response = await api.post('/login', credentials);
-    console.log('authService: Login response:', response.data);
+
     return response.data;
   } catch (error) {
-    console.error('authService: Login error:', error);
-    // Return the error response data instead of throwing
     if (error.response && error.response.data) {
       return error.response.data;
     }
@@ -27,10 +24,26 @@ export const signup = async (userData) => {
 
 export const verifyOtp = async (otpData) => {
   try {
-    const response = await api.post('/verify-otp', otpData);
+    console.log('authService: Sending OTP verification request:', otpData);
+    const response = await api.post('/verify-code', otpData);
+    if (response.data && response.data.result && response.data.result.token) {
+      const { token, refreshToken } = response.data.result;
+      console.log('authService: Saving tokens to localStorage');
+      if (token) {
+        localStorage.setItem('authToken', token);
+      }
+      if (refreshToken) {
+        localStorage.setItem('refreshToken', refreshToken);
+      }
+    }
+
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || 'OTP verification failed');
+    console.error('authService: OTP verification error:', error);
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    return { message: 'OTP verification failed' };
   }
 };
 
@@ -76,4 +89,4 @@ export const refreshToken = async (refreshTokenData) => {
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Token refresh failed');
   }
-}; 
+};

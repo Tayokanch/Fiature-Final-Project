@@ -25,35 +25,19 @@ const LoginPage = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      console.log('LoginPage: Calling login with:', { email: formData.email, password: formData.password });
-      const response = await login({ email: formData.email, password: formData.password });
-      console.log('LoginPage: Received response:', response);
-      
-      if (response && response.verification_uuid) {
-        console.log('LoginPage: Navigating to OTP page with verification_uuid:', response.verification_uuid);
-        // Navigate to OTP page for verification
-        navigate('/otp', { 
-          state: { 
-            verification_uuid: response.verification_uuid, 
-            action: 'login', 
-            email: formData.email 
-          } 
-        });
-      } else if (response && response.token) {
-        console.log('LoginPage: Direct login success, navigating to dashboard');
-        // Direct login success (no OTP required)
-        navigate('/dashboard');
-      } else {
-        console.log('LoginPage: No verification_uuid or token in response');
-      }
-    } catch (err) {
-      // Error is handled by the useAuth hook
-      console.error('LoginPage: Login error:', err);
-    }
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const response = await login({ email: formData.email, password: formData.password });
+    
+    if (response && (response.verificationUuid)) {
+      // Navigate to OTP page for verification
+      navigate('/otp', { 
+        state: { 
+          verification_uuid: response.verificationUuid, 
+          action: 'login', 
+        } 
+      });
+    } 
   };
 
   return (
@@ -134,23 +118,6 @@ const LoginPage = () => {
             Sign up
           </Link>
         </p>
-        
-        {/* Test button for debugging */}
-        <button 
-          onClick={() => {
-            console.log('Test navigation to OTP');
-            navigate('/otp', { 
-              state: { 
-                verification_uuid: 'test-uuid', 
-                action: 'login', 
-                email: 'test@example.com' 
-              } 
-            });
-          }}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          Test OTP Navigation
-        </button>
       </div>
     </div>
   );

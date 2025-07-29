@@ -40,11 +40,26 @@ api.interceptors.response.use(
             refreshToken,
           });
 
-          if (response.data.token) {
-            localStorage.setItem('authToken', response.data.token);
-            localStorage.setItem('refreshToken', response.data.refreshToken);
+          // Handle both direct token response and nested result response
+          let newToken, newRefreshToken;
+          
+          if (response.data.result && response.data.result.token) {
+            // Nested result structure
+            newToken = response.data.result.token;
+            newRefreshToken = response.data.result.refreshToken;
+          } else if (response.data.token) {
+            // Direct token structure
+            newToken = response.data.token;
+            newRefreshToken = response.data.refreshToken;
+          }
+
+          if (newToken) {
+            localStorage.setItem('authToken', newToken);
+            if (newRefreshToken) {
+              localStorage.setItem('refreshToken', newRefreshToken);
+            }
             
-            originalRequest.headers.Authorization = `Bearer ${response.data.token}`;
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
             return api(originalRequest);
           }
         }

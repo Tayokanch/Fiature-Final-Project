@@ -2,8 +2,8 @@ import api from '../../services/api';
 
 export const login = async (credentials) => {
   try {
-    const { data } = await api.post('/login', credentials);
-    return data;
+    const response = await api.post('/login', credentials);
+    return response.data;
   } catch (err) {
     return { message: err?.response?.data?.message || 'Login failed' };
   }
@@ -20,10 +20,27 @@ export const signup = async (data) => {
 
 export const verifyOtp = async (data) => {
   try {
-    const res = await api.post('/verify-otp', data);
-    return res.data;
+    console.log('authService: Sending OTP verification request:', data);
+    const response = await api.post('/verify-code', data);
+    console.log('authService: OTP verification success response:', response.data);
+    if (response.data && response.data.result && response.data.result.token) {
+      const { token, refreshToken } = response.data.result;
+      localStorage.setItem('authToken', token);
+      if (refreshToken) {
+        localStorage.setItem('refreshToken', refreshToken);
+      }
+      console.log('authService: Tokens saved successfully');
+    } else {
+      console.log('authService: No tokens found in response:', response.data);
+    }
+    
+    return response.data;
   } catch (err) {
-    return { message: err?.response?.data?.message || 'OTP verification failed' };
+    console.error('authService: OTP verification error:', err);
+    if (err.response && err.response.data) {
+      return err.response.data;
+    }
+    return { message: 'OTP verification failed' };
   }
 };
 

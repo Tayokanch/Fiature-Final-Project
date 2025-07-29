@@ -6,7 +6,6 @@ import {
   verifyOtp as verifyOtpApi,
   refreshToken as refreshTokenApi,
 } from '../features/auth/authService';
-import { saveToken } from '../utils/authUtils';
 import { encryptRecaptchaToken } from '../features/auth/authUtils';
 
 export const useAuth = () => {
@@ -17,27 +16,39 @@ export const useAuth = () => {
   const login = async ({ email, password }) => {
     setAuthError('');
     setAuthLoading(true);
+    
     try {
       const recaptchaToken = encryptRecaptchaToken(email);
-      console.log('useAuth login called with:', { email, recaptchaToken });
       const response = await loginApi({ email, password, recaptchaToken });
-      console.log('useAuth login response:', response);
       
+      // If we have a verificationUuid, OTP verification is required
+      if (response && response.verificationUuid) {
+        return response;
+      }
+      
+      // Check for token in nested result object (OTP verification response)
+      if (response && response.result && response.result.token) {
+        const { token, refreshToken, user } = response.result;
+        // Update React state (tokens already saved to localStorage by service)
+        authContext.setToken(token);
+        if (refreshToken) authContext.setRefreshToken(refreshToken);
+        if (user) authContext.setUser(user);
+        return response;
+      }
+      
+      // Check for direct token (direct login response)
       if (response && response.token) {
-        saveToken(response.token);
+        // Update React state (tokens already saved to localStorage by service)
         authContext.setToken(response.token);
         if (response.refreshToken) authContext.setRefreshToken(response.refreshToken);
         return response;
-      } else if (response && response.verification_uuid) {
-        // OTP verification required
-        console.log('OTP verification required, returning response:', response);
-        return response;
-      } else {
-        setAuthError(response?.message || 'Login failed');
-        return response;
       }
+      
+      // If we get here, something went wrong
+      setAuthError(response?.message || 'Login failed');
+      return response;
+      
     } catch (error) {
-      console.error('useAuth login error:', error);
       setAuthError('Login failed');
       return { message: 'Login failed' };
     } finally {
@@ -51,7 +62,7 @@ export const useAuth = () => {
     try {
       const recaptchaToken = encryptRecaptchaToken(email);
       const response = await signupApi({ email, password, recaptchaToken, firstName, lastName });
-      if (!response?.verification_uuid) setAuthError(response?.message || 'Signup failed');
+      if (!response?.verificationUuid) setAuthError(response?.message || 'Signup failed');
       return response;
     } catch (error) {
       setAuthError('Signup failed');
@@ -65,16 +76,26 @@ export const useAuth = () => {
     setAuthLoading(true);
     try {
       const response = await verifyOtpApi(payload);
-      if (response && response.token) {
-        saveToken(response.token);
-        authContext.setToken(response.token);
-        if (response.refreshToken) authContext.setRefreshToken(response.refreshToken);
+      console.log('useAuth verifyOtp response:', response);
+      
+      // Check if response has result object with token
+      if (response && response.result && response.result.token) {
+        console.log('OTP verification successful, updating auth state');
+        const { token, refreshToken, user } = response.result;
+        
+        // Update React state (tokens already saved to localStorage by service)
+        authContext.setToken(token);
+        if (refreshToken) authContext.setRefreshToken(refreshToken);
+        if (user) authContext.setUser(user);
+        
         return response;
       } else {
-        setAuthError(response?.message || 'OTP verification failed');
+        // Return the response for component to handle
+        return response;
       }
     } catch (error) {
-      setAuthError('OTP verification failed');
+      console.error('useAuth verifyOtp error:', error);
+      return { message: 'OTP verification failed' };
     } finally {
       setAuthLoading(false);
     }

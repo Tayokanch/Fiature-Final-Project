@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../store/authStore';
+import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../store/themeStore';
 import { getThemeColors } from '../utils/themeUtils';
 import Button from './Button';

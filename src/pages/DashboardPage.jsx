@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../store/authStore';
+import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../store/themeStore';
 import { getThemeColors } from '../utils/themeUtils';
 import Card from '../components/Card';

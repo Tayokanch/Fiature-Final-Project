@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from '../store/authStore';
+import { useAuth } from '../hooks/useAuth';
 import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
 import LoginPage from '../pages/auth/LoginPage';
@@ -36,7 +36,7 @@ const AppRoutes = () => {
 
         <Route
           path="/otp"
-          element={<OTPPage />}
+          element={token ? <Navigate to="/dashboard" /> : <OTPPage />}
         />
       </Route>
 

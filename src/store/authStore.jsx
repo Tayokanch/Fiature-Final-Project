@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getToken, saveToken, removeToken } from '../utils/authUtils';
-import { refreshToken as refreshTokenApi } from '../services/authService';
+import { refreshToken as refreshTokenApi } from '../services/apiAuthService';
 
 const AuthContext = createContext();
 
@@ -12,7 +11,7 @@ export const AuthProvider = ({ children }) => {
 
   // Check for existing token on mount
   useEffect(() => {
-    const storedToken = getToken();
+    const storedToken = localStorage.getItem('authToken');
     if (storedToken) {
       setToken(storedToken);
     }
@@ -23,14 +22,15 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
     setToken(authToken);
     setRefreshToken(refreshTokenValue);
-    saveToken(authToken);
+    localStorage.setItem('authToken', authToken);
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
     setRefreshToken(null);
-    removeToken();
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
   };
 
   const refreshAuthToken = async () => {
@@ -38,10 +38,26 @@ export const AuthProvider = ({ children }) => {
     
     try {
       const response = await refreshTokenApi({ refreshToken });
-      if (response.token) {
-        setToken(response.token);
-        setRefreshToken(response.refreshToken);
-        saveToken(response.token);
+      
+      // Handle both direct token response and nested result response
+      let newToken, newRefreshToken;
+      
+      if (response.result && response.result.token) {
+        // Nested result structure
+        newToken = response.result.token;
+        newRefreshToken = response.result.refreshToken;
+      } else if (response.token) {
+        // Direct token structure
+        newToken = response.token;
+        newRefreshToken = response.refreshToken;
+      }
+      
+      if (newToken) {
+        setToken(newToken);
+        if (newRefreshToken) {
+          setRefreshToken(newRefreshToken);
+        }
+        localStorage.setItem('authToken', newToken);
         return true;
       }
     } catch (error) {
