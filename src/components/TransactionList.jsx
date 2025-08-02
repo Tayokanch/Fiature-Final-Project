@@ -2,6 +2,7 @@ import React from 'react';
 import { useTheme } from '../store/themeStore';
 import { getThemeColors } from '../utils/themeUtils';
 import { FiDollarSign, FiClock, FiCheckCircle, FiXCircle, FiHash, FiArrowUpRight, FiArrowDownLeft, FiRefreshCw } from 'react-icons/fi';
+import { formatTransactionDate, getTransactionStatusColor } from '../Transaction/appStart';
 
 const TransactionList = ({ transactions = [], loading = false }) => {
   const { isDarkMode } = useTheme();
@@ -70,19 +71,6 @@ const TransactionList = ({ transactions = [], loading = false }) => {
         </thead>
         <tbody>
           {transactions.map((transaction, index) => {
-            const getTransactionIcon = (type) => {
-              switch (type) {
-                case 'swap':
-                  return <FiRefreshCw size={14} style={{ color: colors.iconColor }} />;
-                case 'withdrawal':
-                  return <FiArrowUpRight size={14} style={{ color: colors.iconColor }} />;
-                case 'deposit':
-                  return <FiArrowDownLeft size={14} style={{ color: colors.iconColor }} />;
-                default:
-                  return <FiDollarSign size={14} style={{ color: colors.iconColor }} />;
-              }
-            };
-
             const getTransactionTypeColor = (type) => {
               switch (type) {
                 case 'swap':
@@ -93,6 +81,19 @@ const TransactionList = ({ transactions = [], loading = false }) => {
                   return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
                 default:
                   return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+              }
+            };
+
+            const getTransactionIcon = (type) => {
+              switch (type) {
+                case 'swap':
+                  return <FiRefreshCw size={16} style={{ color: colors.iconColor }} />;
+                case 'deposit':
+                  return <FiArrowDownLeft size={16} style={{ color: colors.iconColor }} />;
+                case 'withdrawal':
+                  return <FiArrowUpRight size={16} style={{ color: colors.iconColor }} />;
+                default:
+                  return <FiDollarSign size={16} style={{ color: colors.iconColor }} />;
               }
             };
 
@@ -107,7 +108,7 @@ const TransactionList = ({ transactions = [], loading = false }) => {
                   style={{ color: colors.textColor }}
                 >
                   <FiClock size={14} style={{ color: colors.iconColor }} />
-                  {new Date(transaction.transaction_date || transaction.timestamp).toLocaleDateString()}
+                  {formatTransactionDate(transaction.transaction_date || transaction.timestamp)}
                 </td>
                 <td 
                   className="py-3 px-4"
@@ -115,7 +116,7 @@ const TransactionList = ({ transactions = [], loading = false }) => {
                 >
                   <div className="flex items-center gap-2">
                     {getTransactionIcon(transaction.transaction_type)}
-                    <span className={`px-2 py-1 rounded-full text-xs ${getTransactionTypeColor(transaction.transaction_type)}`}>
+                    <span className={`px-3 py-1.5 rounded-full text-xs font-semibold inline-block min-w-[80px] text-center ${getTransactionTypeColor(transaction.transaction_type)}`}>
                       {transaction.transaction_type}
                     </span>
                   </div>
@@ -130,19 +131,13 @@ const TransactionList = ({ transactions = [], loading = false }) => {
                   className="py-3 px-4 font-medium"
                   style={{ color: colors.dashboardTextColor }}
                 >
-                  {parseFloat(transaction.amount).toFixed(8)} {transaction.asset}
+                  {transaction.amount} {transaction.asset}
                 </td>
                 <td 
                   className="py-3 px-4"
                   style={{ color: colors.textColor }}
                 >
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    transaction.status === 'completed' 
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                      : transaction.status === 'pending'
-                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                  }`}>
+                  <span className={`px-2 py-1 rounded-full text-xs ${getTransactionStatusColor(transaction.status)}`}>
                     {transaction.status}
                   </span>
                 </td>

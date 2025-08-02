@@ -106,7 +106,7 @@ const UserAssets = ({ assets = [], loading = false }) => {
                 className="font-semibold"
                 style={{ color: colors.textColor }}
               >
-                {parseFloat(asset.balance).toFixed(8)}
+                {asset.balance}
               </div>
               <div 
                 className="text-sm"

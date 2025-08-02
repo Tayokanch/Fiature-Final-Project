@@ -1,4 +1,6 @@
-{
+
+
+export const AppStartData = {
 	"totalBalance": "17879.07",
 	"userAssets": [
 		{
@@ -2281,4 +2283,50 @@
 			]
 		}
 	]
-}
+};
+
+
+
+// Helper function to format transaction amount
+export const formatTransactionAmount = (amount, asset) => {
+  const numAmount = parseFloat(amount);
+  
+  switch (asset) {
+    case 'BTC':
+      return numAmount.toFixed(8);
+    case 'ETH':
+      return numAmount.toFixed(6);
+    case 'USDT':
+    case 'USDC':
+      return numAmount.toFixed(2);
+    default:
+      return numAmount.toFixed(4);
+  }
+};
+
+// Helper function to format date
+export const formatTransactionDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+// Helper function to get transaction status color
+export const getTransactionStatusColor = (status) => {
+  switch (status) {
+    case 'completed':
+      return 'text-green-600';
+    case 'pending':
+      return 'text-yellow-600';
+    case 'failed':
+      return 'text-red-600';
+    default:
+      return 'text-gray-600';
+  }
+};
+

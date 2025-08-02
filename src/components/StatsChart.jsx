@@ -1,27 +1,24 @@
 import React from 'react';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   Tooltip,
   Legend,
-  ArcElement,
-} from 'chart.js';
-import { Bar, Doughnut } from 'react-chartjs-2';
+  ResponsiveContainer,
+  ComposedChart,
+} from 'recharts';
 import { useTheme } from '../store/themeStore';
 import { getThemeColors } from '../utils/themeUtils';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-);
 
 const StatsChart = () => {
   const { isDarkMode } = useTheme();
@@ -35,85 +32,65 @@ const StatsChart = () => {
     averageResponseTime: 245,
   };
 
-  const barChartData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    datasets: [
-      {
-        label: 'API Requests',
-        data: [120, 190, 300, 500, 200, 300],
-        backgroundColor: colors.iconColor,
-        borderColor: colors.iconColor,
-        borderWidth: 1,
-      },
-    ],
-  };
+  // Monthly API usage data
+  const monthlyData = [
+    { month: 'Jan', requests: 120, success: 115, failed: 5 },
+    { month: 'Feb', requests: 190, success: 182, failed: 8 },
+    { month: 'Mar', requests: 300, success: 285, failed: 15 },
+    { month: 'Apr', requests: 500, success: 475, failed: 25 },
+    { month: 'May', requests: 200, success: 190, failed: 10 },
+    { month: 'Jun', requests: 300, success: 285, failed: 15 },
+  ];
 
-  const doughnutData = {
-    labels: ['Successful', 'Failed'],
-    datasets: [
-      {
-        data: [statsData.successfulRequests, statsData.failedRequests],
-        backgroundColor: [
-          '#10B981', // Green for success
-          '#EF4444', // Red for failed
-        ],
-        borderColor: [
-          '#10B981',
-          '#EF4444',
-        ],
-        borderWidth: 2,
-      },
-    ],
-  };
+  // Success rate data for pie chart
+  const successRateData = [
+    { name: 'Successful', value: statsData.successfulRequests, color: '#10B981' },
+    { name: 'Failed', value: statsData.failedRequests, color: '#EF4444' },
+  ];
 
-  const barChartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        display: false,
-      },
-      title: {
-        display: false,
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        grid: {
-          color: colors.secondaryTextColor,
-        },
-        ticks: {
-          color: colors.textColor,
-        },
-      },
-      x: {
-        grid: {
-          color: colors.secondaryTextColor,
-        },
-        ticks: {
-          color: colors.textColor,
-        },
-      },
-    },
-  };
+  // Response time data
+  const responseTimeData = [
+    { time: '00:00', ms: 180 },
+    { time: '04:00', ms: 220 },
+    { time: '08:00', ms: 245 },
+    { time: '12:00', ms: 280 },
+    { time: '16:00', ms: 260 },
+    { time: '20:00', ms: 200 },
+  ];
 
-  const doughnutOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'bottom',
-        labels: {
-          color: colors.textColor,
-        },
-      },
-    },
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div 
+          className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border"
+          style={{ 
+            borderColor: colors.borderColor,
+            color: colors.textColor 
+          }}
+        >
+          <p className="font-semibold">{label}</p>
+          {payload.map((entry, index) => (
+            <p key={index} style={{ color: entry.color }}>
+              {entry.name}: {entry.value}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <div 
+          className="text-center p-4 rounded-lg border transition-all duration-200 hover:shadow-md"
+          style={{ 
+            backgroundColor: colors.cardBg,
+            borderColor: colors.borderColor 
+          }}
+        >
           <div 
             className="text-2xl font-bold"
             style={{ color: colors.dashboardTextColor }}
@@ -128,10 +105,16 @@ const StatsChart = () => {
           </div>
         </div>
         
-        <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <div 
+          className="text-center p-4 rounded-lg border transition-all duration-200 hover:shadow-md"
+          style={{ 
+            backgroundColor: colors.cardBg,
+            borderColor: colors.borderColor 
+          }}
+        >
           <div 
-            className="text-2xl font-bold text-green-600"
-            style={{ color: colors.dashboardTextColor }}
+            className="text-2xl font-bold"
+            style={{ color: '#10B981' }}
           >
             {statsData.successfulRequests.toLocaleString()}
           </div>
@@ -143,10 +126,16 @@ const StatsChart = () => {
           </div>
         </div>
         
-        <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <div 
+          className="text-center p-4 rounded-lg border transition-all duration-200 hover:shadow-md"
+          style={{ 
+            backgroundColor: colors.cardBg,
+            borderColor: colors.borderColor 
+          }}
+        >
           <div 
-            className="text-2xl font-bold text-red-600"
-            style={{ color: colors.dashboardTextColor }}
+            className="text-2xl font-bold"
+            style={{ color: '#EF4444' }}
           >
             {statsData.failedRequests.toLocaleString()}
           </div>
@@ -158,7 +147,13 @@ const StatsChart = () => {
           </div>
         </div>
         
-        <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <div 
+          className="text-center p-4 rounded-lg border transition-all duration-200 hover:shadow-md"
+          style={{ 
+            backgroundColor: colors.cardBg,
+            borderColor: colors.borderColor 
+          }}
+        >
           <div 
             className="text-2xl font-bold"
             style={{ color: colors.dashboardTextColor }}
@@ -175,26 +170,133 @@ const StatsChart = () => {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Monthly API Usage - Composed Chart */}
+        <div 
+          className="p-4 rounded-lg border"
+          style={{ 
+            backgroundColor: colors.cardBg,
+            borderColor: colors.borderColor 
+          }}
+        >
           <h4 
             className="text-lg font-semibold mb-4"
             style={{ color: colors.textColor }}
           >
             Monthly API Usage
           </h4>
-          <Bar data={barChartData} options={barChartOptions} />
+          <ResponsiveContainer width="100%" height={300}>
+            <ComposedChart data={monthlyData}>
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                stroke={colors.secondaryTextColor}
+                opacity={0.3}
+              />
+              <XAxis 
+                dataKey="month" 
+                stroke={colors.textColor}
+                fontSize={12}
+              />
+              <YAxis 
+                stroke={colors.textColor}
+                fontSize={12}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <Bar 
+                dataKey="requests" 
+                fill={colors.iconColor}
+                radius={[4, 4, 0, 0]}
+                opacity={0.8}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="success" 
+                stroke="#10B981" 
+                strokeWidth={2}
+                dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }}
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
         </div>
-        
-        <div>
+
+        {/* Success Rate - Pie Chart */}
+        <div 
+          className="p-4 rounded-lg border"
+          style={{ 
+            backgroundColor: colors.cardBg,
+            borderColor: colors.borderColor 
+          }}
+        >
           <h4 
             className="text-lg font-semibold mb-4"
             style={{ color: colors.textColor }}
           >
             Request Success Rate
           </h4>
-          <Doughnut data={doughnutData} options={doughnutOptions} />
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={successRateData}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={100}
+                paddingAngle={5}
+                dataKey="value"
+              >
+                {successRateData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
+      </div>
+
+      {/* Response Time Trend */}
+      <div 
+        className="p-4 rounded-lg border"
+        style={{ 
+          backgroundColor: colors.cardBg,
+          borderColor: colors.borderColor 
+        }}
+      >
+        <h4 
+          className="text-lg font-semibold mb-4"
+          style={{ color: colors.textColor }}
+        >
+          Response Time Trend (24h)
+        </h4>
+        <ResponsiveContainer width="100%" height={250}>
+          <AreaChart data={responseTimeData}>
+            <CartesianGrid 
+              strokeDasharray="3 3" 
+              stroke={colors.secondaryTextColor}
+              opacity={0.3}
+            />
+            <XAxis 
+              dataKey="time" 
+              stroke={colors.textColor}
+              fontSize={12}
+            />
+            <YAxis 
+              stroke={colors.textColor}
+              fontSize={12}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Area 
+              type="monotone" 
+              dataKey="ms" 
+              stroke={colors.iconColor}
+              fill={colors.iconColor}
+              fillOpacity={0.3}
+              strokeWidth={2}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

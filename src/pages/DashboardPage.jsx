@@ -6,9 +6,12 @@ import Card from '../components/Card';
 import Button from '../components/Button';
 import WebhookManager from '../components/WebhookManager';
 import TransactionList from '../components/TransactionList';
-import UserAssets from '../components/UserAssets';
+
 import StatsChart from '../components/StatsChart';
 import { fetchDashboardData } from '../services/dashboardService';
+import { AppStartData } from '../Transaction/appStart';
+
+
 
 const DashboardPage = () => {
   const { token } = useAuth();
@@ -29,10 +32,9 @@ const DashboardPage = () => {
         
         // Fetch all data from /onAppStartup endpoint
         const dashboardData = await fetchDashboardData();
-        
-        setBalance(parseFloat(dashboardData.totalBalance) || 0);
-        setAssets(dashboardData.userAssets || []);
-        setTransactions(dashboardData.userTransactions || []);
+        setBalance(dashboardData.totalBalance || AppStartData.totalBalance);
+        setAssets(dashboardData.userAssets || AppStartData.userAssets);
+        setTransactions(dashboardData.userTransactions || AppStartData.userTransactions);
       } catch (err) {
         console.error('Dashboard data error:', err);
         setError('Failed to load dashboard data');
@@ -80,7 +82,7 @@ const DashboardPage = () => {
       {/* Balance and Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card variant="balance" className="col-span-1">
-          <div className="text-center">
+          <div className="text-center mb-6">
             <h3 
               className="text-lg font-semibold mb-2"
               style={{ color: colors.textColor }}
@@ -93,6 +95,156 @@ const DashboardPage = () => {
             >
               ${balance.toLocaleString()}
             </div>
+          </div>
+          
+          {/* Assets Table inside Balance Card */}
+          <div className="border-t pt-6" style={{ borderColor: colors.borderColor }}>
+            <div className="flex items-center justify-between mb-4">
+              <h4 
+                className="text-lg font-semibold"
+                style={{ color: colors.textColor }}
+              >
+                Your Assets
+              </h4>
+              <div 
+                className="text-sm px-2 py-1 rounded-full"
+                style={{ 
+                  color: colors.secondaryTextColor,
+                  backgroundColor: colors.cardBg,
+                  border: `1px solid ${colors.borderColor}`
+                }}
+              >
+                {assets.length} assets
+              </div>
+            </div>
+            
+            {loading ? (
+              <div className="animate-pulse space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                    <div className="flex-1">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mt-1"></div>
+                    </div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                  </div>
+                ))}
+              </div>
+            ) : !assets || assets.length === 0 ? (
+              <div className="text-center py-6">
+                <div 
+                  className="text-sm"
+                  style={{ color: colors.secondaryTextColor }}
+                >
+                  No assets found
+                </div>
+              </div>
+                         ) : (
+                               <div>
+                  <table className="w-full">
+                   <thead>
+                     <tr 
+                       className="border-b"
+                       style={{ borderColor: colors.borderColor }}
+                     >
+                       <th 
+                         className="text-left py-3 px-4 font-semibold text-sm"
+                         style={{ color: colors.textColor }}
+                       >
+                         Asset
+                       </th>
+                       <th 
+                         className="text-left py-3 px-4 font-semibold text-sm"
+                         style={{ color: colors.textColor }}
+                       >
+                         Symbol
+                       </th>
+                       <th 
+                         className="text-right py-3 px-4 font-semibold text-sm"
+                         style={{ color: colors.textColor }}
+                       >
+                         Balance
+                       </th>
+                     </tr>
+                   </thead>
+                   <tbody>
+                     {assets.map((asset, index) => (
+                                               <tr 
+                          key={asset.symbol}
+                          className={`border-b transition-all duration-200 hover:scale-[1.02] hover:shadow-md cursor-pointer ${
+                            index === assets.length - 1 ? '' : 'border-b'
+                          }`}
+                          style={{ 
+                            borderColor: colors.borderColor,
+                            backgroundColor: index % 2 === 0 ? 'transparent' : `${colors.cardBg}20`
+                          }}
+                                                     onMouseEnter={(e) => {
+                             e.currentTarget.style.backgroundColor = `${colors.cardBg}60`;
+                             e.currentTarget.style.transform = 'translateY(-1px)';
+                           }}
+                           onMouseLeave={(e) => {
+                             e.currentTarget.style.backgroundColor = index % 2 === 0 ? 'transparent' : `${colors.cardBg}20`;
+                             e.currentTarget.style.transform = 'translateY(0)';
+                           }}
+                        >
+                         <td className="py-3 px-4">
+                           <div className="flex items-center space-x-3">
+                             <div className="relative">
+                               <img 
+                                 src={asset.logo_url} 
+                                 alt={asset.name}
+                                 className="w-8 h-8 rounded-full object-cover"
+                                 onError={(e) => {
+                                   e.target.style.display = 'none';
+                                   e.target.nextSibling.style.display = 'flex';
+                                 }}
+                               />
+                               <div 
+                                 className="w-8 h-8 rounded-full items-center justify-center text-xs font-bold hidden"
+                                 style={{ 
+                                   backgroundColor: colors.iconColor,
+                                   color: colors.brandButtonText
+                                 }}
+                               >
+                                 {asset.symbol.charAt(0)}
+                               </div>
+                             </div>
+                             <div>
+                               <div 
+                                 className="font-semibold text-sm"
+                                 style={{ color: colors.textColor }}
+                               >
+                                 {asset.name}
+                               </div>
+                             </div>
+                           </div>
+                         </td>
+                                                   <td className="py-3 px-4">
+                                                         <span 
+                               className="px-3 py-1.5 rounded-full text-xs font-semibold inline-block w-[50px] text-center"
+                               style={{ 
+                                 backgroundColor: colors.iconColor,
+                                 color: colors.brandButtonText
+                               }}
+                             >
+                               {asset.symbol}
+                             </span>
+                          </td>
+                         <td className="py-3 px-4 text-right">
+                           <div 
+                             className="font-bold text-sm"
+                             style={{ color: colors.textColor }}
+                           >
+                             {asset.balance}
+                           </div>
+                         </td>
+                       </tr>
+                     ))}
+                   </tbody>
+                 </table>
+               </div>
+            )}
           </div>
         </Card>
 
@@ -107,8 +259,7 @@ const DashboardPage = () => {
         </Card>
       </div>
 
-      {/* User Assets */}
-      <UserAssets assets={assets} loading={loading} />
+      
 
       {/* JWT Token Display */}
       <Card>
