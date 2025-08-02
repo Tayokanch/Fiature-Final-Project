@@ -6,6 +6,7 @@ import Card from '../components/Card';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import { resetPassword } from '../services/authService';
+import { FiUser, FiLock, FiMail, FiGlobe, FiCheck, FiX } from 'react-icons/fi';
 
 const SettingsPage = () => {
   const { user } = useAuth();
@@ -91,17 +92,17 @@ const SettingsPage = () => {
   };
 
   const tabs = [
-    { id: 'profile', label: 'Profile', icon: '👤' },
-    { id: 'password', label: 'Password', icon: '🔑' },
-    { id: 'support', label: 'Support', icon: '📧' },
-    { id: 'language', label: 'Language', icon: '🌍' },
+    { id: 'profile', label: 'Profile', icon: <FiUser size={16} /> },
+    { id: 'password', label: 'Password', icon: <FiLock size={16} /> },
+    { id: 'support', label: 'Support', icon: <FiMail size={16} /> },
+    { id: 'language', label: 'Language', icon: <FiGlobe size={16} /> },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-4 sm:px-6 lg:px-8">
       <div>
         <h1 
-          className="text-3xl font-bold mb-2"
+          className="text-2xl sm:text-3xl font-bold mb-2"
           style={{ color: colors.textColor }}
         >
           Settings
@@ -114,22 +115,28 @@ const SettingsPage = () => {
         </p>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+      {/* Tab Navigation - Responsive */}
+      <div 
+        className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-1 p-1 rounded-lg overflow-hidden"
+        style={{ backgroundColor: colors.cardBg }}
+      >
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+            className={`flex items-center justify-center sm:justify-start py-3 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
               activeTab === tab.id
-                ? 'bg-white dark:bg-gray-700 shadow-sm'
-                : 'hover:bg-gray-200 dark:hover:bg-gray-700'
+                ? 'shadow-sm transform scale-[1.02]'
+                : 'hover:opacity-80'
             }`}
             style={{
               color: activeTab === tab.id ? colors.textColor : colors.secondaryTextColor,
+              backgroundColor: activeTab === tab.id ? colors.brandButtonBg : 'transparent',
             }}
           >
-            <span className="mr-2">{tab.icon}</span>
+            <span className="mr-2" style={{ color: activeTab === tab.id ? colors.brandButtonText : colors.iconColor }}>
+              {tab.icon}
+            </span>
             {tab.label}
           </button>
         ))}
@@ -137,12 +144,20 @@ const SettingsPage = () => {
 
       {/* Success/Error Messages */}
       {success && (
-        <div className="text-green-600 text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+        <div 
+          className="flex items-center gap-2 text-green-600 text-center p-4 rounded-lg"
+          style={{ backgroundColor: `${colors.cardBg}80` }}
+        >
+          <FiCheck size={16} />
           {success}
         </div>
       )}
       {error && (
-        <div className="text-red-500 text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+        <div 
+          className="flex items-center gap-2 text-red-500 text-center p-4 rounded-lg"
+          style={{ backgroundColor: `${colors.cardBg}80` }}
+        >
+          <FiX size={16} />
           {error}
         </div>
       )}
@@ -154,7 +169,7 @@ const SettingsPage = () => {
             <h3 className="text-lg font-semibold mb-4" style={{ color: colors.textColor }}>
               Profile Information
             </h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
                 label="First Name"
                 value={profileData.firstName}
@@ -172,7 +187,7 @@ const SettingsPage = () => {
               value={profileData.email}
               onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
             />
-            <Button type="submit" variant="primary" disabled={loading}>
+            <Button type="submit" variant="primary" disabled={loading} className="w-full sm:w-auto">
               {loading ? 'Updating...' : 'Update Profile'}
             </Button>
           </form>
@@ -204,7 +219,7 @@ const SettingsPage = () => {
               onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
               required
             />
-            <Button type="submit" variant="primary" disabled={loading}>
+            <Button type="submit" variant="primary" disabled={loading} className="w-full sm:w-auto">
               {loading ? 'Changing...' : 'Change Password'}
             </Button>
           </form>
@@ -227,7 +242,7 @@ const SettingsPage = () => {
               onChange={(e) => setSupportData({ ...supportData, message: e.target.value })}
               required
             />
-            <Button type="submit" variant="primary">
+            <Button type="submit" variant="primary" className="w-full sm:w-auto">
               Send Support Request
             </Button>
           </form>
@@ -238,21 +253,49 @@ const SettingsPage = () => {
             <h3 className="text-lg font-semibold mb-4" style={{ color: colors.textColor }}>
               Language Settings
             </h3>
-            <div className="space-y-2">
-              <label className="flex items-center space-x-3">
-                <input type="radio" name="language" value="en" defaultChecked />
+            <div className="space-y-3">
+              <label className="flex items-center space-x-3 p-3 rounded-lg border cursor-pointer hover:bg-opacity-50 transition-colors"
+                style={{ 
+                  borderColor: colors.borderColor,
+                  backgroundColor: colors.cardBg 
+                }}>
+                <input 
+                  type="radio" 
+                  name="language" 
+                  value="en" 
+                  defaultChecked 
+                  className="text-blue-600"
+                />
                 <span style={{ color: colors.textColor }}>English</span>
               </label>
-              <label className="flex items-center space-x-3">
-                <input type="radio" name="language" value="es" />
+              <label className="flex items-center space-x-3 p-3 rounded-lg border cursor-pointer hover:bg-opacity-50 transition-colors"
+                style={{ 
+                  borderColor: colors.borderColor,
+                  backgroundColor: colors.cardBg 
+                }}>
+                <input 
+                  type="radio" 
+                  name="language" 
+                  value="es" 
+                  className="text-blue-600"
+                />
                 <span style={{ color: colors.textColor }}>Español</span>
               </label>
-              <label className="flex items-center space-x-3">
-                <input type="radio" name="language" value="fr" />
+              <label className="flex items-center space-x-3 p-3 rounded-lg border cursor-pointer hover:bg-opacity-50 transition-colors"
+                style={{ 
+                  borderColor: colors.borderColor,
+                  backgroundColor: colors.cardBg 
+                }}>
+                <input 
+                  type="radio" 
+                  name="language" 
+                  value="fr" 
+                  className="text-blue-600"
+                />
                 <span style={{ color: colors.textColor }}>Français</span>
               </label>
             </div>
-            <Button variant="primary">
+            <Button variant="primary" className="w-full sm:w-auto">
               Save Language Preference
             </Button>
           </div>
