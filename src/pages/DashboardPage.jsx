@@ -6,8 +6,9 @@ import Card from '../components/Card';
 import Button from '../components/Button';
 import WebhookManager from '../components/WebhookManager';
 import TransactionList from '../components/TransactionList';
+import UserAssets from '../components/UserAssets';
 import StatsChart from '../components/StatsChart';
-import { fetchBalance, fetchTransactions } from '../services/dashboardService';
+import { fetchDashboardData } from '../services/dashboardService';
 
 const DashboardPage = () => {
   const { token } = useAuth();
@@ -15,6 +16,7 @@ const DashboardPage = () => {
   const colors = getThemeColors(isDarkMode);
 
   const [balance, setBalance] = useState(0);
+  const [assets, setAssets] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -23,14 +25,16 @@ const DashboardPage = () => {
     const loadDashboardData = async () => {
       try {
         setLoading(true);
-        const [balanceData, transactionsData] = await Promise.all([
-          fetchBalance(),
-          fetchTransactions()
-        ]);
+        setError('');
         
-        setBalance(balanceData.balance || 0);
-        setTransactions(transactionsData.transactions || []);
+        // Fetch all data from /onAppStartup endpoint
+        const dashboardData = await fetchDashboardData();
+        
+        setBalance(parseFloat(dashboardData.totalBalance) || 0);
+        setAssets(dashboardData.userAssets || []);
+        setTransactions(dashboardData.userTransactions || []);
       } catch (err) {
+        console.error('Dashboard data error:', err);
         setError('Failed to load dashboard data');
       } finally {
         setLoading(false);
@@ -81,7 +85,7 @@ const DashboardPage = () => {
               className="text-lg font-semibold mb-2"
               style={{ color: colors.textColor }}
             >
-              Account Balance
+              Total Balance
             </h3>
             <div 
               className="text-3xl font-bold"
@@ -102,6 +106,9 @@ const DashboardPage = () => {
           <StatsChart />
         </Card>
       </div>
+
+      {/* User Assets */}
+      <UserAssets assets={assets} loading={loading} />
 
       {/* JWT Token Display */}
       <Card>
@@ -144,7 +151,7 @@ const DashboardPage = () => {
             View All
           </Button>
         </div>
-        <TransactionList transactions={transactions} />
+        <TransactionList transactions={transactions} loading={loading} />
       </Card>
     </div>
   );

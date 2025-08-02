@@ -4,8 +4,7 @@ import {
   login as loginApi,
   signup as signupApi,
   verifyOtp as verifyOtpApi,
-  refreshToken as refreshTokenApi,
-} from '../features/auth/authService';
+} from '../services/authService';
 import { encryptRecaptchaToken } from '../features/auth/authUtils';
 
 export const useAuth = () => {
@@ -26,21 +25,10 @@ export const useAuth = () => {
         return response;
       }
       
-      // Check for token in nested result object (OTP verification response)
+      // If login is successful without OTP, update auth state
       if (response && response.result && response.result.token) {
-        const { token, refreshToken, user } = response.result;
-        // Update React state (tokens already saved to localStorage by service)
-        authContext.setToken(token);
-        if (refreshToken) authContext.setRefreshToken(refreshToken);
-        if (user) authContext.setUser(user);
-        return response;
-      }
-      
-      // Check for direct token (direct login response)
-      if (response && response.token) {
-        // Update React state (tokens already saved to localStorage by service)
-        authContext.setToken(response.token);
-        if (response.refreshToken) authContext.setRefreshToken(response.refreshToken);
+        const { token, user } = response.result;
+        authContext.login(user, token);
         return response;
       }
       
@@ -76,25 +64,18 @@ export const useAuth = () => {
     setAuthLoading(true);
     try {
       const response = await verifyOtpApi(payload);
-      console.log('useAuth verifyOtp response:', response);
       
-      // Check if response has result object with token
+      // If OTP verification is successful, update auth state
       if (response && response.result && response.result.token) {
-        console.log('OTP verification successful, updating auth state');
-        const { token, refreshToken, user } = response.result;
-        
-        // Update React state (tokens already saved to localStorage by service)
-        authContext.setToken(token);
-        if (refreshToken) authContext.setRefreshToken(refreshToken);
-        if (user) authContext.setUser(user);
-        
+        const { token, user } = response.result;
+        authContext.login(user, token);
         return response;
       } else {
         // Return the response for component to handle
         return response;
       }
     } catch (error) {
-      console.error('useAuth verifyOtp error:', error);
+      setAuthError('OTP verification failed');
       return { message: 'OTP verification failed' };
     } finally {
       setAuthLoading(false);
@@ -103,18 +84,6 @@ export const useAuth = () => {
 
   const logout = () => {
     authContext.logout();
-  };
-
-  const refresh = async () => {
-    setAuthError('');
-    setAuthLoading(true);
-    try {
-      await authContext.handleRefreshToken();
-    } catch {
-      setAuthError('Token refresh failed');
-    } finally {
-      setAuthLoading(false);
-    }
   };
 
   return {
@@ -126,6 +95,5 @@ export const useAuth = () => {
     signup,
     verifyOtp,
     logout,
-    refresh,
   };
 }; 

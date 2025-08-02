@@ -1,84 +1,60 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { refreshToken as refreshTokenApi } from '../services/apiAuthService';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-  const [refreshToken, setRefreshToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Check for existing token on mount
   useEffect(() => {
+    // For development: use hardcoded token, fallback to localStorage
+    const hardcodedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOnsidmFsaWQiOnRydWUsInVzZXJJZCI6ImI1NjgzMmNlLWI3MGQtNDAyZS04ODRiLTlmYzVmYjk3MjFiMSJ9LCJpYXQiOjE3NTM5OTYwNjIsImV4cCI6MTc1Mzk5Njk2Mn0.jXed8eXYwSn7C-_dXahpwUGGjVuyXFPtzlOwkgd2sGs";
     const storedToken = localStorage.getItem('authToken');
-    if (storedToken) {
-      setToken(storedToken);
+    const token = hardcodedToken || storedToken;
+    
+    if (token) {
+      setToken(token);
     }
     setLoading(false);
   }, []);
 
-  const login = (userData, authToken, refreshTokenValue) => {
+  // Update auth state when tokens change in localStorage
+  useEffect(() => {
+    const handleStorageChange = () => {
+      // For development: use hardcoded token, fallback to localStorage
+      const hardcodedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOnsidmFsaWQiOnRydWUsInVzZXJJZCI6ImI1NjgzMmNlLWI3MGQtNDAyZS04ODRiLTlmYzVmYjk3MjFiMSJ9LCJpYXQiOjE3NTM5OTYwNjIsImV4cCI6MTc1Mzk5Njk2Mn0.jXed8eXYwSn7C-_dXahpwUGGjVuyXFPtzlOwkgd2sGs";
+      const storedToken = localStorage.getItem('authToken');
+      const token = hardcodedToken || storedToken;
+      setToken(token);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const login = (userData, authToken) => {
     setUser(userData);
     setToken(authToken);
-    setRefreshToken(refreshTokenValue);
     localStorage.setItem('authToken', authToken);
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
-    setRefreshToken(null);
     localStorage.removeItem('authToken');
     localStorage.removeItem('refreshToken');
-  };
-
-  const refreshAuthToken = async () => {
-    if (!refreshToken) return false;
-    
-    try {
-      const response = await refreshTokenApi({ refreshToken });
-      
-      // Handle both direct token response and nested result response
-      let newToken, newRefreshToken;
-      
-      if (response.result && response.result.token) {
-        // Nested result structure
-        newToken = response.result.token;
-        newRefreshToken = response.result.refreshToken;
-      } else if (response.token) {
-        // Direct token structure
-        newToken = response.token;
-        newRefreshToken = response.refreshToken;
-      }
-      
-      if (newToken) {
-        setToken(newToken);
-        if (newRefreshToken) {
-          setRefreshToken(newRefreshToken);
-        }
-        localStorage.setItem('authToken', newToken);
-        return true;
-      }
-    } catch (error) {
-      console.error('Token refresh failed:', error);
-    }
-    
-    logout();
-    return false;
   };
 
   const value = {
     user,
     token,
-    refreshToken,
     loading,
     login,
     logout,
-    refreshAuthToken,
     setUser,
-    setToken,
-    setRefreshToken,
+    setToken, // Add setToken to the context
   };
 
   return (

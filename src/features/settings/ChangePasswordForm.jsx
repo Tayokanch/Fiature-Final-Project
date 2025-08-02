@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../store/authStore';
-import { changePassword } from '../../services/apiAuthService';
+import { changePassword } from '../../services/authService';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 

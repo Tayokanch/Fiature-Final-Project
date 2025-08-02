@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signup } from '../../services/apiAuthService';
+import { signup } from '../../services/authService';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { useTheme } from '../../store/themeStore';

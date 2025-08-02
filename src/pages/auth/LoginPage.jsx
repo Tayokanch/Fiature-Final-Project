@@ -29,15 +29,19 @@ const LoginPage = () => {
     event.preventDefault();
     const response = await login({ email: formData.email, password: formData.password });
     
-    if (response && (response.verificationUuid)) {
+    if (response && response.verificationUuid) {
       // Navigate to OTP page for verification
       navigate('/otp', { 
         state: { 
           verification_uuid: response.verificationUuid, 
-          action: 'login', 
+          action: 'login',
+          email: formData.email,
         } 
       });
-    } 
+    } else if (response && response.result && response.result.token) {
+      // Login successful without OTP, navigate to dashboard
+      navigate('/dashboard');
+    }
   };
 
   return (

@@ -5,7 +5,7 @@ import { getThemeColors } from '../utils/themeUtils';
 import Card from '../components/Card';
 import Input from '../components/Input';
 import Button from '../components/Button';
-import { resetPassword } from '../services/apiAuthService';
+import { resetPassword } from '../services/authService';
 
 const SettingsPage = () => {
   const { user } = useAuth();
