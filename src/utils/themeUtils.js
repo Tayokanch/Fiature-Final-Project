@@ -26,6 +26,9 @@ export const getThemeColors = (isDarkMode) => ({
   dashboardTextColor: isDarkMode ? 'gray' : '#9C7C00',
   dashboardCircleCardBg: isDarkMode ? '#000000' : '#f5f5f5',
 
+  // Borders
+  borderColor: isDarkMode ? '#333333' : '#E5E5E5',
+
   // Misc
   modalBg: isDarkMode ? '#1E1E1E' : '#EAEAEA',
   borderWidth: '0.3px',
