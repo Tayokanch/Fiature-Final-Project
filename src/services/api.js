@@ -11,7 +11,7 @@ export const setUpdateAuthToken = (fn) => {
 
 const API_BASE_URL = 'https://890fd417a30b.ngrok-free.app';
 const token =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOnsidmFsaWQiOnRydWUsInVzZXJJZCI6ImI1NjgzMmNlLWI3MGQtNDAyZS04ODRiLTlmYzVmYjk3MjFiMSJ9LCJpYXQiOjE3NTQxNDMwNjIsImV4cCI6MTc1NDE0Mzk2Mn0.KZtInu2ZrWmFoDlI1bbN5mSKIPV2_IyWJrLGnqizdxQ';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOnsidmFsaWQiOnRydWUsInVzZXJJZCI6ImI1NjgzMmNlLWI3MGQtNDAyZS04ODRiLTlmYzVmYjk3MjFiMSJ9LCJpYXQiOjE3NTQxNTY2ODEsImV4cCI6MTc1NDE1NzU4MX0.czt1yr1DBcaOWiP1hkdzVR9GsjgaPXXR01fc9f1mgaA';
 
 const protectedApi = axios.create({
   baseURL: API_BASE_URL,
