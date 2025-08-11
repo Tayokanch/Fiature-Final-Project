@@ -69,16 +69,20 @@ const WebhookManager = () => {
 
   return (
     <Card>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <h3 
-          className="text-lg font-semibold"
+          className="text-base lg:text-lg font-semibold"
           style={{ color: colors.textColor }}
         >
           Webhook Management
         </h3>
         <span 
-          className="text-sm"
-          style={{ color: colors.secondaryTextColor }}
+          className="text-xs lg:text-sm px-2 py-1 rounded-full border"
+          style={{ 
+            color: colors.secondaryTextColor,
+            backgroundColor: colors.inputBg,
+            borderColor: colors.borderColor
+          }}
         >
           {webhooks.length}/3 webhooks
         </span>
@@ -107,10 +111,10 @@ const WebhookManager = () => {
             {webhooks.map((webhook, index) => (
               <div 
                 key={index}
-                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
               >
                 <span 
-                  className="text-sm font-mono break-all"
+                  className="text-xs lg:text-sm font-mono break-all"
                   style={{ color: colors.textColor }}
                 >
                   {webhook}
@@ -118,7 +122,7 @@ const WebhookManager = () => {
                 <Button
                   variant="secondary"
                   onClick={() => handleDeleteWebhook(webhook)}
-                  className="ml-3 text-xs"
+                  className="text-xs lg:text-sm w-full sm:w-auto"
                 >
                   Delete
                 </Button>
@@ -128,14 +132,14 @@ const WebhookManager = () => {
 
           {/* Add Webhook Form */}
           {webhooks.length < 3 && (
-            <form onSubmit={handleAddWebhook} className="flex gap-3">
+            <form onSubmit={handleAddWebhook} className="flex flex-col sm:flex-row gap-3">
               <Input
                 placeholder="Enter webhook URL"
                 value={newWebhookUrl}
                 onChange={(e) => setNewWebhookUrl(e.target.value)}
                 className="flex-1"
               />
-              <Button type="submit" variant="primary">
+              <Button type="submit" variant="primary" className="w-full sm:w-auto">
                 Add Webhook
               </Button>
             </form>
@@ -143,7 +147,7 @@ const WebhookManager = () => {
 
           {webhooks.length === 0 && (
             <div 
-              className="text-center py-8 text-sm"
+              className="text-center py-6 lg:py-8 text-xs lg:text-sm"
               style={{ color: colors.secondaryTextColor }}
             >
               No webhooks configured. Add your first webhook above.

@@ -170,22 +170,22 @@ const StatsChart = () => {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
         {/* Monthly API Usage - Composed Chart */}
         <div 
-          className="p-4 rounded-lg border"
+          className="p-3 lg:p-4 rounded-lg border"
           style={{ 
             backgroundColor: colors.cardBg,
             borderColor: colors.borderColor 
           }}
         >
           <h4 
-            className="text-lg font-semibold mb-4"
+            className="text-base lg:text-lg font-semibold mb-3 lg:mb-4"
             style={{ color: colors.textColor }}
           >
             Monthly API Usage
           </h4>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={200} className="sm:h-[250px]">
             <ComposedChart data={monthlyData}>
               <CartesianGrid 
                 strokeDasharray="3 3" 
@@ -195,11 +195,13 @@ const StatsChart = () => {
               <XAxis 
                 dataKey="month" 
                 stroke={colors.textColor}
-                fontSize={12}
+                fontSize={11}
+                className="text-xs lg:text-sm"
               />
               <YAxis 
                 stroke={colors.textColor}
-                fontSize={12}
+                fontSize={11}
+                className="text-xs lg:text-sm"
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
@@ -222,26 +224,26 @@ const StatsChart = () => {
 
         {/* Success Rate - Pie Chart */}
         <div 
-          className="p-4 rounded-lg border"
+          className="p-3 lg:p-4 rounded-lg border"
           style={{ 
             backgroundColor: colors.cardBg,
             borderColor: colors.borderColor 
           }}
         >
           <h4 
-            className="text-lg font-semibold mb-4"
+            className="text-base lg:text-lg font-semibold mb-3 lg:mb-4"
             style={{ color: colors.textColor }}
           >
             Request Success Rate
           </h4>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={200} className="sm:h-[250px]">
             <PieChart>
               <Pie
                 data={successRateData}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={100}
+                innerRadius={40}
+                outerRadius={70}
                 paddingAngle={5}
                 dataKey="value"
               >
@@ -254,49 +256,51 @@ const StatsChart = () => {
             </PieChart>
           </ResponsiveContainer>
         </div>
-      </div>
 
-      {/* Response Time Trend */}
-      <div 
-        className="p-4 rounded-lg border"
-        style={{ 
-          backgroundColor: colors.cardBg,
-          borderColor: colors.borderColor 
-        }}
-      >
-        <h4 
-          className="text-lg font-semibold mb-4"
-          style={{ color: colors.textColor }}
+        {/* Response Time Trend */}
+        <div 
+          className="p-3 lg:p-4 rounded-lg border md:col-span-2 xl:col-span-1"
+          style={{ 
+            backgroundColor: colors.cardBg,
+            borderColor: colors.borderColor 
+          }}
         >
-          Response Time Trend (24h)
-        </h4>
-        <ResponsiveContainer width="100%" height={250}>
-          <AreaChart data={responseTimeData}>
-            <CartesianGrid 
-              strokeDasharray="3 3" 
-              stroke={colors.secondaryTextColor}
-              opacity={0.3}
-            />
-            <XAxis 
-              dataKey="time" 
-              stroke={colors.textColor}
-              fontSize={12}
-            />
-            <YAxis 
-              stroke={colors.textColor}
-              fontSize={12}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Area 
-              type="monotone" 
-              dataKey="ms" 
-              stroke={colors.iconColor}
-              fill={colors.iconColor}
-              fillOpacity={0.3}
-              strokeWidth={2}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+          <h4 
+            className="text-base lg:text-lg font-semibold mb-3 lg:mb-4"
+            style={{ color: colors.textColor }}
+          >
+            Response Time Trend (24h)
+          </h4>
+          <ResponsiveContainer width="100%" height={200} className="sm:h-[250px]">
+            <AreaChart data={responseTimeData}>
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                stroke={colors.secondaryTextColor}
+                opacity={0.3}
+              />
+              <XAxis 
+                dataKey="time" 
+                stroke={colors.textColor}
+                fontSize={11}
+                className="text-xs lg:text-sm"
+              />
+              <YAxis 
+                stroke={colors.textColor}
+                fontSize={11}
+                className="text-xs lg:text-sm"
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Area 
+                type="monotone" 
+                dataKey="ms" 
+                stroke={colors.iconColor}
+                fill={colors.iconColor}
+                fillOpacity={0.3}
+                strokeWidth={2}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );
